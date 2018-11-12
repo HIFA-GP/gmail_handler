@@ -15,15 +15,17 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import mimetypes
 import json
-
+import pprint
 
 def SetUP_Gmail_API():
     SCOPES = 'https://mail.google.com/'
                      # 'https://www.googleapis.com/auth/gmail.compose'
+
     flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
     # credentials = flow.run_console()
     credentials = flow.run_local_server()
     service = build('gmail', 'v1', credentials=credentials)
+    print(type(credentials))
     print('Ready')
     return  service
 
@@ -46,13 +48,13 @@ def create_message(sender, to, subject, message_text=None, message_html=None):
   message['to'] = to
   message['from'] = sender
   message['subject'] = subject
-  
+
   if message_text:
     part1 = MIMEText(message_text, 'plain')
     message.attach(part1)
 
-  if message_html:  
-    part2 = MIMEText(message_html, 'html')  
+  if message_html:
+    part2 = MIMEText(message_html, 'html')
     message.attach(part2)
 
   return {'raw': (base64.urlsafe_b64encode(message.as_bytes())).decode('utf-8')}
@@ -187,7 +189,10 @@ def GetMimeMessage(service, user_id, msg_id):
                                              format='raw').execute()
 
     print('Message snippet: %s' % message['snippet'])
-
+    #
+    # for k, v in message.items():
+    #         print(k)
+    #         print(v)
     msg_str = base64.urlsafe_b64decode(message['raw'].encode('utf-8'))
 
     mime_msg = email.message_from_string(str(msg_str))
