@@ -1,7 +1,11 @@
 from __future__ import print_function
-from apiclient.discovery import build
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+import google.oauth2.credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+
 from httplib2 import Http
-from oauth2client import file, client, tools
+# from oauth2client import file, client, tools
 import base64
 import email
 from email.mime.audio import MIMEAudio
@@ -10,20 +14,16 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import mimetypes
-from googleapiclient.errors import HttpError
-from apiclient import errors
 import json
 
 
 def SetUP_Gmail_API():
     SCOPES = 'https://mail.google.com/'
                      # 'https://www.googleapis.com/auth/gmail.compose'
-    store = file.Storage('credentials.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    service = build('gmail', 'v1', http=creds.authorize(Http()))
+    flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
+    # credentials = flow.run_console()
+    credentials = flow.run_local_server()
+    service = build('gmail', 'v1', credentials=credentials)
     print('Ready')
     return  service
 
